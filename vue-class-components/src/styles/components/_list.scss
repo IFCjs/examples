@@ -1,0 +1,23 @@
+.list {
+  &-item {
+    &-wrapper {
+      @apply flex items-center my-4 cursor-pointer text-gray-600 h-12 px-2;
+
+      &:hover {
+        @apply text-indigo-700;
+      }
+    }
+
+    &-icon {
+      @apply h-6 mx-2;
+    }
+
+    &-active {
+      @apply text-indigo-700;
+
+      &:hover {
+        @apply text-indigo-800;
+      }
+    }
+  }
+}

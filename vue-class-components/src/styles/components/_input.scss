@@ -1,0 +1,11 @@
+.input {
+  &-default {
+    @apply h-10 p-1 rounded-lg z-5000 bg-white border w-64 mt-2;
+  }
+
+  &-range {
+    &-wrapper {
+      @apply flex flex-col mx-4 my-8 relative;
+    }
+  }
+}

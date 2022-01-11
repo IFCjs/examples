@@ -1,6 +1,6 @@
 import Vue from 'vue'
 import App from './App.vue'
-import '@/styles/main.css'
+import './styles/main.scss'
 import ToastedPlugin from 'vue-toasted'
 
 Vue.use(ToastedPlugin, {

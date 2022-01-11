@@ -1,9 +1,16 @@
 <template>
   <section>
     <canvas id="viewer" @dblclick="pick" class="viewer-wrapper" />
-    <UploadFile
-      @file-changed="renderUploadedFile"
-      :upload-status="uploadStatus"
+    <Sidebar
+      :reset-set-area="resetSetArea"
+      @handle-active="handleActiveAction"
+    />
+    <input
+      type="file"
+      ref="input"
+      style="display: none"
+      @change="fileChanged"
+      accept="*.ifc"
     />
     <p class="viewer-properties-text" v-text="`ID: ${entityData}`" />
   </section>
@@ -13,10 +20,11 @@
 import { Component, Vue } from 'vue-property-decorator'
 import IfcManager from '@/controllers/IFC/IfcManager'
 import { Intersection, Raycaster, Vector2 } from 'three'
-import UploadFile from '@/components/shared/UploadFile.vue'
+import Sidebar from '@/components/Viewer/Sidebar.vue'
+import { SidebarAction } from '../store/Models'
 
 @Component({
-  components: { UploadFile }
+  components: { Sidebar }
 })
 export default class Viewer extends Vue {
   private entityData: string = ''
@@ -33,10 +41,25 @@ export default class Viewer extends Vue {
   private id: string = ''
   private threeCanvas!: HTMLCanvasElement
   private uploadStatus: string = ''
+  private resetSetArea: boolean = false
 
   mounted() {
     this.IFCManager = new IfcManager('viewer')
     this.threeCanvas = document.getElementById('viewer') as HTMLCanvasElement
+  }
+
+  private showUploadPrompt() {
+    ;(this.$refs.input as HTMLInputElement).click()
+  }
+
+  private fileChanged(e: Event): File | null {
+    const target = e.target as HTMLInputElement
+
+    if (target.files) {      
+      this.renderUploadedFile(target.files[0] as File)
+    }
+
+    return null
   }
 
   private async renderUploadedFile(file: File) {
@@ -53,9 +76,15 @@ export default class Viewer extends Vue {
       this.uploadStatus = ''
       this.$toasted.success('File loaded successfully')
     } catch (error) {
-      this.$toasted.error(error)
-    } finally {
-      this.uploadStatus = ''
+      this.$toasted.error('error')
+    }
+  }
+
+  private handleActiveAction(action: SidebarAction) {
+    switch (action.title) {
+      case 'Upload':
+        this.showUploadPrompt()
+        break
     }
   }
 
