@@ -2,9 +2,10 @@
   <section>
     <canvas id="viewer" @dblclick="pick" class="viewer-wrapper" />
     <Sidebar
-      :reset-set-area="resetSetArea"
+      :unactive-postgres="unActivePostgres"
       @handle-active="handleActiveAction"
     />
+    <PostgresModal v-if="showPostgresModal" @hide-modal="unActiveModal" />
     <input
       type="file"
       ref="input"
@@ -17,14 +18,15 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'vue-property-decorator'
+import { Component, Vue, Prop } from 'vue-property-decorator'
 import IfcManager from '@/controllers/IFC/IfcManager'
 import { Intersection, Raycaster, Vector2 } from 'three'
 import Sidebar from '@/components/Viewer/Sidebar.vue'
 import { SidebarAction } from '../store/Models'
+import PostgresModal from './Viewer/PostgresModal.vue'
 
 @Component({
-  components: { Sidebar }
+  components: { Sidebar, PostgresModal }
 })
 export default class Viewer extends Vue {
   private entityData: string = ''
@@ -40,8 +42,8 @@ export default class Viewer extends Vue {
   private geometry: any
   private id: string = ''
   private threeCanvas!: HTMLCanvasElement
-  private uploadStatus: string = ''
-  private resetSetArea: boolean = false
+  private showPostgresModal: boolean = false
+  private unActivePostgres: boolean = false
 
   mounted() {
     this.IFCManager = new IfcManager('viewer')
@@ -55,7 +57,7 @@ export default class Viewer extends Vue {
   private fileChanged(e: Event): File | null {
     const target = e.target as HTMLInputElement
 
-    if (target.files) {      
+    if (target.files) {
       this.renderUploadedFile(target.files[0] as File)
     }
 
@@ -64,7 +66,6 @@ export default class Viewer extends Vue {
 
   private async renderUploadedFile(file: File) {
     try {
-      this.uploadStatus = 'Loading...'
       const ifcURL = URL.createObjectURL(file)
 
       this.IFCManager.scene.ifcModel =
@@ -73,7 +74,6 @@ export default class Viewer extends Vue {
       this.IFCManager.scene.add(this.IFCManager.scene.ifcModel.mesh)
 
       this.addPicking()
-      this.uploadStatus = ''
       this.$toasted.success('File loaded successfully')
     } catch (error) {
       this.$toasted.error('error')
@@ -85,7 +85,19 @@ export default class Viewer extends Vue {
       case 'Upload':
         this.showUploadPrompt()
         break
+      case 'Postgres':
+        this.showPostgresModal = action.active
+        break
     }
+  }
+
+  private unActiveModal() {
+    this.showPostgresModal = false
+    this.unActivePostgres = true
+
+    setTimeout(() => {
+      this.unActivePostgres = false
+    }, 150)
   }
 
   private addPicking() {
