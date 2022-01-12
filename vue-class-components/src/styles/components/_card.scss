@@ -1,0 +1,14 @@
+.card {
+  &-context {
+    @apply p-4 ;
+
+    &:hover {
+      @apply bg-indigo-100 shadow-lg rounded w-full;
+    }
+    &-wrapper {
+      @apply absolute z-5000 bg-white w-52 border border-gray-300 rounded-lg;
+      @apply flex flex-col text-sm py-4 px-2 cursor-pointer;
+      @apply text-gray-800 text-sm p-2 border-solid;
+    }
+  }
+}

@@ -1,17 +1,35 @@
 <template>
-  <div class="flex flex-col">
-    <label :for="inputId" class="font-bold text-sm text-white" v-text="text" />
-    <input :id="inputId" :value="value" @input="input" class="input-default" />
+  <div>
+    <label for="input" class="input-label" v-text="label" />
+    <div class="mt-1">
+      <input
+        id="input"
+        :value="value"
+        @input="onInput($event.target.value)"
+        :type="inputType"
+        :autocomplete="autoComplete"
+        class="input-field"
+        required
+      />
+    </div>
   </div>
 </template>
 
 <script lang="ts">
 import { Vue, Component, Prop, Emit } from 'vue-property-decorator'
 
-@Component
+@Component({
+  components: {}
+})
 export default class Input extends Vue {
-  @Prop({ default: '' }) text!: string
   @Prop({ default: '' }) value!: string
-  @Prop({ default: '' }) inputId!: string
+  @Prop({ default: 'text' }) inputType!: string
+  @Prop({ default: '' }) autoComplete!: string
+  @Prop({ default: '' }) label!: string
+
+  @Emit()
+  private onInput(value: string): string {
+    return value
+  }
 }
 </script>
