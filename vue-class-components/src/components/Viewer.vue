@@ -1,11 +1,31 @@
 <template>
   <section>
-    <canvas id="viewer" @dblclick="pick" class="viewer-wrapper" />
-    <UploadFile
-      @file-changed="renderUploadedFile"
-      :upload-status="uploadStatus"
+    <canvas
+      id="viewer"
+      @click="pick"
+      @contextmenu="contextMenu"
+      class="viewer-wrapper"
     />
-    <p class="viewer-properties-text" v-text="`ID: ${entityData}`" />
+    <Sidebar
+      :unactive-postgres="unActivePostgres"
+      @handle-active="handleActiveAction"
+    />
+    <ContextMenu
+      v-if="showContextMenu"
+      @click-context-menu="checkAction"
+      @hide-context-menu="showContextMenu = false"
+      :style="`top:${yPosition}px; left:${xPosition}px`"
+      :actions="['Isolate','Hide']"
+    />
+    <PostgresModal v-if="showPostgresModal" @hide-modal="unActiveModal" />
+    <input
+      type="file"
+      ref="input"
+      style="display: none"
+      @change="fileChanged"
+      accept="*.ifc"
+    />
+    <p class="viewer-properties-text" v-text="`ID: ${id}`" />
   </section>
 </template>
 
@@ -13,35 +33,55 @@
 import { Component, Vue } from 'vue-property-decorator'
 import IfcManager from '@/controllers/IFC/IfcManager'
 import { Intersection, Raycaster, Vector2 } from 'three'
-import UploadFile from '@/components/shared/UploadFile.vue'
+import Sidebar from '@/components/Viewer/Sidebar.vue'
+import { SidebarAction } from '../store/Models'
+import PostgresModal from './Viewer/PostgresModal.vue'
+import ContextMenu from '@/components/Viewer/ContextMenu.vue'
 
 @Component({
-  components: { UploadFile }
+  components: { Sidebar, PostgresModal, ContextMenu }
 })
 export default class Viewer extends Vue {
-  private entityData: string = ''
   private raycaster!: Raycaster
   private mouse!: { x: number; y: number }
   private bounds!: DOMRect
-  private x1!: number
-  private x2!: number
-  private y1!: number
-  private y2!: number
+  private x1: number = 0
+  private x2: number = 0
+  private y1: number = 0
+  private y2: number = 0
   private IFCManager!: any
   private found!: Intersection
   private geometry: any
   private id: string = ''
   private threeCanvas!: HTMLCanvasElement
-  private uploadStatus: string = ''
+  private showPostgresModal: boolean = false
+  private unActivePostgres: boolean = false
+  private showContextMenu: boolean = false
+  private hideContextMenu: boolean = false
+  private yPosition: number = 0
+  private xPosition: number = 0
 
   mounted() {
     this.IFCManager = new IfcManager('viewer')
     this.threeCanvas = document.getElementById('viewer') as HTMLCanvasElement
   }
 
+  private showUploadPrompt() {
+    ;(this.$refs.input as HTMLInputElement).click()
+  }
+
+  private fileChanged(e: Event): File | null {
+    const target = e.target as HTMLInputElement
+
+    if (target.files) {
+      this.renderUploadedFile(target.files[0] as File)
+    }
+
+    return null
+  }
+
   private async renderUploadedFile(file: File) {
     try {
-      this.uploadStatus = 'Loading...'
       const ifcURL = URL.createObjectURL(file)
 
       this.IFCManager.scene.ifcModel =
@@ -50,13 +90,40 @@ export default class Viewer extends Vue {
       this.IFCManager.scene.add(this.IFCManager.scene.ifcModel.mesh)
 
       this.addPicking()
-      this.uploadStatus = ''
       this.$toasted.success('File loaded successfully')
     } catch (error) {
-      this.$toasted.error(error)
-    } finally {
-      this.uploadStatus = ''
+      this.$toasted.error('error')
     }
+  }
+
+  private handleActiveAction(action: SidebarAction) {
+    switch (action.title) {
+      case 'Upload':
+        this.showUploadPrompt()
+        break
+      case 'Postgres':
+        this.showPostgresModal = action.active
+        break
+    }
+  }
+
+  private contextMenu(event: MouseEvent) {
+    this.yPosition = event.y
+    this.xPosition = event.x
+    this.showContextMenu = true
+  }
+
+  private checkAction(action: string) {
+    console.log(action, 'action desde el padre')
+  }
+
+  private unActiveModal() {
+    this.showPostgresModal = false
+    this.unActivePostgres = true
+
+    setTimeout(() => {
+      this.unActivePostgres = false
+    }, 150)
   }
 
   private addPicking() {
@@ -81,7 +148,7 @@ export default class Viewer extends Vue {
     return this.raycaster.intersectObjects(this.IFCManager.scene.ifcModels)
   }
 
-  private pick(event: MouseEvent) {
+  private async pick(event: MouseEvent) {
     this.found = this.cast(event)[0]
 
     if (this.found && this.found.faceIndex) {
@@ -93,7 +160,13 @@ export default class Viewer extends Vue {
         this.found.faceIndex
       )
 
-      this.entityData = this.id
+      const props =
+        await this.IFCManager.ifcLoader.ifcManager.getItemProperties(
+          // @ts-ignore
+          this.found.object.modelID,
+          this.id
+        )
+      console.log(props)
     }
   }
 }

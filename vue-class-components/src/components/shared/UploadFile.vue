@@ -1,20 +1,12 @@
 <template>
-  <div class="upload-file-input">
-    <button
-      class="upload-file-button"
-      @click="onClick"
-      v-text="'Upload file'"
-    />
-    <input
-      name="fileToUpload"
-      type="file"
-      ref="input"
-      style="display: none"
-      @change="fileChanged"
-      :accept="accept"
-    />
-    <p class="viewer-upload-status">{{ uploadStatus }}</p>
-  </div>
+  <input
+    name="fileToUpload"
+    type="file"
+    ref="input"
+    style="display: none"
+    @change="fileChanged"
+    :accept="accept"
+  />
 </template>
 
 <script lang="ts">

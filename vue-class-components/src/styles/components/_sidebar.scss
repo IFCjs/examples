@@ -1,0 +1,18 @@
+.sidebar {
+  &-wrapper {
+    @apply absolute top-0 left-0 h-screen border-r z-5000 transition-all duration-500;
+    @apply border-l-0 border-t-0 border-b-0 overflow-hidden cursor-pointer;
+  }
+
+  &-title {
+    @apply flex items-center text-gray-700 m-4 mb-8 w-64;
+
+    &:hover {
+      @apply text-indigo-700;
+    }
+  }
+
+  &-range-legend {
+    @apply absolute -bottom-4 text-xs text-gray-500;
+  }
+}

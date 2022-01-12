@@ -1,0 +1,14 @@
+.input {
+  &-label {
+    @apply block text-sm font-medium text-gray-700;
+  }
+
+  &-field {
+    @apply appearance-none block w-full px-3 py-2 border border-gray-300;
+    @apply rounded-md shadow-sm placeholder-gray-400 sm:text-sm;
+
+    &:focus {
+      @apply outline-none ring-blue-500 border-blue-500;
+    }
+  }
+}
