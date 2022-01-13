@@ -15,7 +15,7 @@
       @click-context-menu="checkAction"
       @hide-context-menu="showContextMenu = false"
       :style="`top:${yPosition}px; left:${xPosition}px`"
-      :actions="['Isolate','Hide']"
+      :actions="['Isolate', 'Hide', 'Wireframe']"
     />
     <PostgresModal v-if="showPostgresModal" @hide-modal="unActiveModal" />
     <input
@@ -37,6 +37,7 @@ import Sidebar from '@/components/Viewer/Sidebar.vue'
 import { SidebarAction } from '../store/Models'
 import PostgresModal from './Viewer/PostgresModal.vue'
 import ContextMenu from '@/components/Viewer/ContextMenu.vue'
+import * as THREE from 'three'
 
 @Component({
   components: { Sidebar, PostgresModal, ContextMenu }
@@ -114,7 +115,50 @@ export default class Viewer extends Vue {
   }
 
   private checkAction(action: string) {
-    console.log(action, 'action desde el padre')
+    switch (action) {
+      case 'Isolate':
+        this.isolate()
+        break
+      case 'Hide':
+        this.hide()
+        break
+      case 'Wireframe':
+        this.wireFrame()
+        break
+    }
+  }
+
+  private isolate() {
+    console.log('isolate')
+  }
+
+  private hide() {
+    console.log('hide')
+  }
+
+  private wireFrame() {
+    console.log('wireFrame', this.id, this.geometry)
+    console.log('ifcManager', this.IFCManager)
+    this.found.object.visible = false
+
+    console.log('this.found', this.found)
+
+    const { scene } = this.IFCManager
+
+    const uuid = '' // nos llega en params
+
+    // @ts-ignore
+    const model = scene.scene.children.find(child => child.uuid === uuid)
+
+    console.log(this.IFCManager.scene.ifcModel)
+
+    const material = new THREE.LineBasicMaterial({ color: 0xfff55f })
+
+    // line
+    const line = new THREE.Line(this.geometry, material)
+    this.IFCManager.scene.add(line)
+
+    console.log('faceIndex', this.found.faceIndex)
   }
 
   private unActiveModal() {
@@ -166,6 +210,7 @@ export default class Viewer extends Vue {
           this.found.object.modelID,
           this.id
         )
+
       console.log(props)
     }
   }
