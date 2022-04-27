@@ -105,6 +105,9 @@ export default class Viewer extends Vue {
       case 'Upload':
         this.showUploadPrompt()
         break
+      case 'GIS/BIM':
+        console.log('GIS/BIM')
+        break
       case 'Pathtracer':
         console.log('Convert to Gltf')
         break

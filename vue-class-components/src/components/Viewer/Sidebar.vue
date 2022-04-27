@@ -28,6 +28,7 @@ import normatives from '../../config/normatives'
 import IconUpload from '../../assets/icons/file-upload.svg'
 import IconPostgres from '../../assets/icons/database-import.svg'
 import IconConvert from '../../assets/icons/convert.svg'
+import IconSet from '../../assets/icons/set.svg'
 
 @Component({
   components: { ActionsListItem, InputRange }
@@ -44,6 +45,12 @@ export default class Sidebar extends Vue {
       icon: IconUpload,
       active: false,
       description: 'Select and render ifc files'
+    },
+    {
+      title: 'GIS/BIM',
+      icon: IconSet,
+      active: false,
+      description: 'Description'
     },
     {
       title: 'Pathtracer',
