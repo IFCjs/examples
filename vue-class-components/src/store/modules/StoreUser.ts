@@ -12,8 +12,6 @@ class StoreUser extends VuexModule {
 
   @Mutation
   setShowModalProgram(showModalProgram: boolean) {
-    console.log('showModalProgram', showModalProgram)
-
     this._showModalProgram = showModalProgram
   }
 

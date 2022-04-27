@@ -30,14 +30,17 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'vue-property-decorator'
+import { Component, Model, Vue } from 'vue-property-decorator'
 import IfcManager from '@/controllers/IFC/IfcManager'
-import { Intersection, Raycaster, Vector2 } from 'three'
+import { Intersection, Material, Raycaster, Scene, Vector2 } from 'three'
 import Sidebar from '@/components/Viewer/Sidebar.vue'
 import { SidebarAction } from '../store/Models'
 import PostgresModal from './Viewer/PostgresModal.vue'
 import ContextMenu from '@/components/Viewer/ContextMenu.vue'
 import * as THREE from 'three'
+import { IFCModel } from 'web-ifc-three/IFC/components/IFCModel'
+import { MeshLambertMaterial } from 'three'
+import { IFCLoader } from 'web-ifc-three/IFCLoader'
 
 @Component({
   components: { Sidebar, PostgresModal, ContextMenu }
@@ -53,7 +56,7 @@ export default class Viewer extends Vue {
   private IFCManager!: any
   private found!: Intersection
   private geometry: any
-  private id: string = ''
+  private id: number = 0
   private threeCanvas!: HTMLCanvasElement
   private showPostgresModal: boolean = false
   private unActivePostgres: boolean = false
@@ -102,6 +105,9 @@ export default class Viewer extends Vue {
       case 'Upload':
         this.showUploadPrompt()
         break
+      case 'Pathtracer':
+        console.log('Convert to Gltf')
+        break
       case 'Postgres':
         this.showPostgresModal = action.active
         break
@@ -129,19 +135,21 @@ export default class Viewer extends Vue {
   }
 
   private isolate() {
-    console.log('isolate')
+    console.log(this.found.object.getObjectById)
   }
 
-  private hide() {
-    console.log('hide')
+  private async hide() {
+    const item = await this.IFCManager.ifcLoader.ifcManager.getItemProperties(
+      // @ts-ignore
+      this.found.object.modelID,
+      this.id
+    )
+
+    console.log(this.id, 'hide')
   }
 
   private wireFrame() {
-    console.log('wireFrame', this.id, this.geometry)
-    console.log('ifcManager', this.IFCManager)
     this.found.object.visible = false
-
-    console.log('this.found', this.found)
 
     const { scene } = this.IFCManager
 
@@ -150,15 +158,11 @@ export default class Viewer extends Vue {
     // @ts-ignore
     const model = scene.scene.children.find(child => child.uuid === uuid)
 
-    console.log(this.IFCManager.scene.ifcModel)
-
     const material = new THREE.LineBasicMaterial({ color: 0xfff55f })
 
     // line
     const line = new THREE.Line(this.geometry, material)
     this.IFCManager.scene.add(line)
-
-    console.log('faceIndex', this.found.faceIndex)
   }
 
   private unActiveModal() {
@@ -210,8 +214,6 @@ export default class Viewer extends Vue {
           this.found.object.modelID,
           this.id
         )
-
-      console.log(props)
     }
   }
 }

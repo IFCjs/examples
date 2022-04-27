@@ -27,6 +27,7 @@ import InputRange from '../shared/InputRange.vue'
 import normatives from '../../config/normatives'
 import IconUpload from '../../assets/icons/file-upload.svg'
 import IconPostgres from '../../assets/icons/database-import.svg'
+import IconConvert from '../../assets/icons/convert.svg'
 
 @Component({
   components: { ActionsListItem, InputRange }
@@ -43,6 +44,12 @@ export default class Sidebar extends Vue {
       icon: IconUpload,
       active: false,
       description: 'Select and render ifc files'
+    },
+    {
+      title: 'Pathtracer',
+      icon: IconConvert,
+      active: false,
+      description: 'Convert to Gltf'
     },
     {
       title: 'Postgres',
@@ -78,7 +85,7 @@ export default class Sidebar extends Vue {
     if (this.isImmediateActions(action.title)) {
       setTimeout(() => {
         this.actionsList[index].active = false
-      }, 150);
+      }, 150)
     }
 
     return action
